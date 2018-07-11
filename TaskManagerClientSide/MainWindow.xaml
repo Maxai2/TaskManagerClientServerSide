@@ -1,12 +1,53 @@
 ﻿<Window x:Class="TaskManagerClientSide.MainWindow"
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:TaskManagerClientSide"
-        mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
-        
-    </Grid>
+								xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+								xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+								xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+								xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+								xmlns:local="clr-namespace:TaskManagerClientSide"
+								mc:Ignorable="d" Title="MainWindow" Height="450" Width="800">
+	<Grid Margin="10 2">
+		<Grid.RowDefinitions>
+			<RowDefinition Height="Auto"/>
+			<RowDefinition/>
+			<RowDefinition Height="Auto"/>
+		</Grid.RowDefinitions>
+
+		<Grid Grid.Row="0">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="7*"/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+
+			<TextBox Grid.Column="0" Text="{Binding ConDisConIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+
+			<Button Grid.Column="1" Margin="5 0 0 0" Content="Connect" Command="{Binding ConnectCom}"/>
+			<Button Grid.Column="1" Margin="5 0 0 0" Content="Disconnect" Visibility="Collapsed" Command="{Binding DisconnectCom}"/>
+		</Grid>
+
+		<ListBox Grid.Row="1" Margin="0 5" ItemsSource="{Binding ProcessList}">
+			<ListBox.ItemContainerStyle>
+				<Style TargetType="ListBoxItem">
+					<Setter Property="ContextMenu">
+						<Setter.Value>
+							<ContextMenu>
+								<MenuItem Header="Kill" Command="{Binding KillCom}"/>
+							</ContextMenu>
+						</Setter.Value>
+					</Setter>
+				</Style>
+			</ListBox.ItemContainerStyle>
+		</ListBox>
+
+		<Grid Grid.Row="2">
+			<Grid.ColumnDefinitions>
+				<ColumnDefinition Width="7*"/>
+				<ColumnDefinition/>
+			</Grid.ColumnDefinitions>
+
+			<TextBox Grid.Column="0" Text="{Binding RunTask}"/>
+
+			<Button Grid.Column="1" Margin="5 0 0 0" Content="Run" Command="{Binding RunCom}"/>
+		</Grid>
+
+	</Grid>
 </Window>
