@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 
 namespace TaskManagerServerSide
@@ -11,13 +13,13 @@ namespace TaskManagerServerSide
     class Program
     {
         static List<string> ProcessList = new List<string>();
-        static Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
 
         //--------------------------------------------------------------------
 
         static void Main(string[] args)
         {
-            var ep = new IPEndPoint(IPAddress.Parse("10.2.14.3"), 7534);
+            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            var ep = new IPEndPoint(IPAddress.Parse("172.16.1.60"), 7534);
 
             socket.Bind(ep);
             socket.Listen(10);
@@ -37,6 +39,11 @@ namespace TaskManagerServerSide
                 if (msg != "")
                 {
                     ParseMsg(msg);
+
+                    var sendBytes = fillProcList();
+
+                    socket.Send(sendBytes);
+
                     msg = string.Empty;
                 }
             }
@@ -51,40 +58,48 @@ namespace TaskManagerServerSide
             switch (mode)
             {
                 case "Connect":
-                    {
-                        ProcessList.Clear();
-                        foreach (var item in Process.GetProcesses().OrderBy(f => f.ProcessName))
-                        {
-                            try
-                            {
-                                ProcessList.Add(item.ProcessName);
-                            }
-                            catch (Exception)
-                            { }
-                        }
-
-                        /*var binFormatter = new BinaryFormatter();
-var mStream = new MemoryStream();
-binFormatter.Serialize(mStream, myObjToSerialize);
-
-//This gives you the byte array.
-mStream.ToArray();*/
-
-                        /*var mStream = new MemoryStream();
-var binFormatter = new BinaryFormatter();
-
-// Where 'objectBytes' is your byte array.
-mStream.Write (objectBytes, 0, objectBytes.Length);
-mStream.Position = 0;
-
-var myObject = binFormatter.Deserialize(mStream) as YourObjectType;*/
-                    }
                     break;
                 case "Run":
+                    {
+                        var variable = msg.Substring(msg.IndexOf(':'));
+
+                        Process.Start(variable);
+                    }
                     break;
                 case "Kill":
+                    {
+                        var variable = Convert.ToInt32(msg.Substring(msg.IndexOf(':')));
+
+                        var proc = Process.GetProcessById(variable);
+
+                        proc.Kill();
+                    }
                     break;
             }
+        }
+
+        //--------------------------------------------------------------------
+
+        static byte[] fillProcList()
+        {
+            ProcessList.Clear();
+
+            foreach (var item in Process.GetProcesses().OrderBy(f => f.ProcessName))
+            {
+                try
+                {
+                    ProcessList.Add(item.ProcessName);
+                }
+                catch (Exception)
+                { }
+            }
+
+            var binFormatter = new BinaryFormatter();
+            var mStream = new MemoryStream();
+
+            binFormatter.Serialize(mStream, ProcessList);
+
+            return mStream.ToArray();
         }
 
         //--------------------------------------------------------------------

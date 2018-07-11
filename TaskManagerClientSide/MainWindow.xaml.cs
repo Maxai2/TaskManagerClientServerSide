@@ -1,10 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -69,8 +72,38 @@ namespace TaskManagerClientSide
                             socket.Connect(ep);
 
                             //var data = Encoding.Default.GetBytes(ClientString);
-                            var data = Encoding.Default.GetBytes("Connected");
+                            var data = Encoding.Default.GetBytes("Connect:");
                             socket.Send(data);
+
+                            var answer = new byte[8192];
+
+                            Task.Run(() =>
+                            {
+                                while (true)
+                                {
+                                    var length = socket.Receive(answer);
+
+                                    if (length != 0)
+                                    {
+                                        var mStream = new MemoryStream();
+                                        var binFormatter = new BinaryFormatter();
+
+                                        mStream.Write(answer, 0, length);
+                                        mStream.Position = 0;
+
+                                        var myObject = binFormatter.Deserialize(mStream) as ObservableCollection<string>;
+
+                                        /*var mStream = new MemoryStream();
+                var binFormatter = new BinaryFormatter();
+
+                // Where 'objectBytes' is your byte array.
+                mStream.Write (objectBytes, 0, objectBytes.Length);
+                mStream.Position = 0;
+
+                var myObject = binFormatter.Deserialize(mStream) as YourObjectType;*/
+                                    }
+                                }
+                            });
                         },
                         (param) =>
                         {
