@@ -12,14 +12,21 @@ namespace TaskManagerServerSide
 {
     class Program
     {
-        static List<string> ProcessList = new List<string>();
+        struct Proc
+        {
+            int Id;
+            string Name;
+        }
 
+        static List<Proc> ProcessList = new List<Proc>();
+        static Socket socket;
         //--------------------------------------------------------------------
 
         static void Main(string[] args)
         {
-            var socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            var ep = new IPEndPoint(IPAddress.Parse("172.16.1.60"), 7534);
+            socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            //var ep = new IPEndPoint(IPAddress.Parse("172.16.1.60"), 7534);
+            var ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7534);
 
             socket.Bind(ep);
             socket.Listen(10);
@@ -42,7 +49,8 @@ namespace TaskManagerServerSide
 
                     var sendBytes = fillProcList();
 
-                    socket.Send(sendBytes);
+                    //socket.Connect(ep);
+                    client.Send(sendBytes);
 
                     msg = string.Empty;
                 }
@@ -55,25 +63,27 @@ namespace TaskManagerServerSide
         {
             var mode = msg.Substring(0, msg.IndexOf(':'));
 
+            var variable = msg.Substring(msg.IndexOf(':') + 1);
+
             switch (mode)
             {
                 case "Connect":
+                case "Refresh":
                     break;
                 case "Run":
                     {
-                        var variable = msg.Substring(msg.IndexOf(':'));
-
                         Process.Start(variable);
                     }
                     break;
                 case "Kill":
                     {
-                        var variable = Convert.ToInt32(msg.Substring(msg.IndexOf(':')));
-
-                        var proc = Process.GetProcessById(variable);
+                        var proc = Process.GetProcessById(Convert.ToInt32(variable));
 
                         proc.Kill();
                     }
+                    break;
+                case "Disconnect":
+                    socket.Close();
                     break;
             }
         }

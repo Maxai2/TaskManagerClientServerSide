@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -22,8 +23,6 @@ namespace TaskManagerClientSide
         Socket socket;
         EndPoint ep;
 
-        //var answer = new byte[8192];
-
         private string conDisConIp = "";
         public string ConDisConIp
         {
@@ -31,14 +30,48 @@ namespace TaskManagerClientSide
             set { conDisConIp = value; OnChanged(); }
         }
 
-        private string runTask;
+        private string runTask = "";
         public string RunTask
         {
             get { return runTask; }
             set { runTask = value; OnChanged(); }
         }
 
-        string ClientString;
+        private int procIndex;
+        public int ProcIndex
+        {
+            get { return procIndex; }
+            set { procIndex = value; OnChanged(); }
+        }
+
+        private Visibility conButVis;
+        public Visibility ConButVis
+        {
+            get { return conButVis; }
+            set { conButVis = value; OnChanged(); }
+        }
+
+        private Visibility disconButVis = Visibility.Collapsed;
+        public Visibility DisconButVis
+        {
+            get { return disconButVis; }
+            set { disconButVis = value; OnChanged(); }
+        }
+
+        private bool listIsEnable = false;
+        public bool ListIsEnable
+        {
+            get { return listIsEnable; }
+            set { listIsEnable = value; OnChanged(); }
+        }
+
+        private bool runIsEnable = false;
+        public bool RunIsEnable
+        {
+            get { return runIsEnable; }
+            set { runIsEnable = value; OnChanged(); }
+        }
+
 
         //----------------------------------------------------------------------
 
@@ -63,47 +96,18 @@ namespace TaskManagerClientSide
                     connectCom = new RelayCommand(
                         (param) =>
                         {
-                            //ClientString = string.Empty;
-                            //ClientString = "Connect: " + ConDisConIp;
-
                             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                             ep = new IPEndPoint(IPAddress.Parse(ConDisConIp), 7534);
 
                             socket.Connect(ep);
 
-                            //var data = Encoding.Default.GetBytes(ClientString);
-                            var data = Encoding.Default.GetBytes("Connect:");
-                            socket.Send(data);
+                            RefreshProcListByCom("Connect");
 
-                            var answer = new byte[8192];
+                            ConButVis = Visibility.Collapsed;
+                            DisconButVis = Visibility.Visible;
 
-                            Task.Run(() =>
-                            {
-                                while (true)
-                                {
-                                    var length = socket.Receive(answer);
-
-                                    if (length != 0)
-                                    {
-                                        var mStream = new MemoryStream();
-                                        var binFormatter = new BinaryFormatter();
-
-                                        mStream.Write(answer, 0, length);
-                                        mStream.Position = 0;
-
-                                        var myObject = binFormatter.Deserialize(mStream) as ObservableCollection<string>;
-
-                                        /*var mStream = new MemoryStream();
-                var binFormatter = new BinaryFormatter();
-
-                // Where 'objectBytes' is your byte array.
-                mStream.Write (objectBytes, 0, objectBytes.Length);
-                mStream.Position = 0;
-
-                var myObject = binFormatter.Deserialize(mStream) as YourObjectType;*/
-                                    }
-                                }
-                            });
+                            ListIsEnable = true;
+                            RunIsEnable = true;
                         },
                         (param) =>
                         {
@@ -119,6 +123,155 @@ namespace TaskManagerClientSide
                 }
 
                 return connectCom;
+            }
+        }
+
+        //----------------------------------------------------------------------
+
+        private ICommand disconnectCom;
+        public ICommand DisconnectCom
+        {
+            get
+            {
+                if (disconnectCom is null)
+                {
+                    disconnectCom = new RelayCommand(
+                        (param) =>
+                        {
+                            RefreshProcListByCom("Disconnect");
+
+                            ConButVis = Visibility.Visible;
+                            DisconButVis = Visibility.Collapsed;
+
+                            ListIsEnable = false;
+                            RunIsEnable = false;
+                        });
+                }
+
+                return disconnectCom;
+            }
+        }
+
+
+        //----------------------------------------------------------------------
+
+        private ICommand killCom;
+        public ICommand KillCom
+        {
+            get
+            {
+                if (killCom is null)
+                {
+                    killCom = new RelayCommand(
+                        (param) =>
+                        {
+                            RefreshProcListByCom("Kill");
+                        });
+                }
+
+                return killCom;
+            }
+        }
+
+        //----------------------------------------------------------------------
+
+        private ICommand refreshCom;
+        public ICommand RefreshCom
+        {
+            get
+            {
+                if (refreshCom is null)
+                {
+                    refreshCom = new RelayCommand(
+                        (param) =>
+                        {
+                            RefreshProcListByCom("Refresh");
+                        });
+                }
+
+                return refreshCom;
+            }
+        }
+        //----------------------------------------------------------------------
+
+        private ICommand runCom;
+        public ICommand RunCom
+        {
+            get
+            {
+                if (runCom is null)
+                {
+                    runCom = new RelayCommand(
+                        (param) =>
+                        {
+                            RefreshProcListByCom("Run");
+
+                            RunTask = "";
+                        },
+                        (param) =>
+                        {
+                            if (RunTask != "")
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                return false;
+                            }
+                        });
+                }
+
+                return runCom;
+            }
+        }
+
+        //----------------------------------------------------------------------
+
+        void RefreshProcListByCom(string com)
+        {
+            byte[] data = null;
+
+            switch (com)
+            {
+                case "Disconnect":
+                    data = Encoding.Default.GetBytes("Disconnect:");
+                    break;
+                case "Connect":
+                    data = Encoding.Default.GetBytes("Connect:");
+                    break;
+                case "Kill":
+                    data = Encoding.Default.GetBytes($"Kill:{ProcIndex}");
+                    break;
+                case "Run":
+                    data = Encoding.Default.GetBytes($"Run:{RunTask}");
+                    break;
+                case "Refresh":
+                    data = Encoding.Default.GetBytes($"Refresh:");
+                    break;
+            }
+
+            socket.Send(data);
+
+            var answer = new byte[8192];
+
+            var length = socket.Receive(answer);
+
+            if (length != 0)
+            {
+                var mStream = new MemoryStream();
+                var binFormatter = new BinaryFormatter();
+
+                mStream.Write(answer, 0, length);
+                mStream.Position = 0;
+
+                var tempCol = binFormatter.Deserialize(mStream) as List<string>;
+
+                ProcessList.Clear();
+
+                foreach (var item in tempCol)
+                {
+                    ProcessList.Add(item);
+                }
             }
         }
 
