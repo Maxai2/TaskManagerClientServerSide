@@ -12,10 +12,11 @@ namespace TaskManagerServerSide
 {
     class Program
     {
+        [Serializable]
         struct Proc
         {
-            int Id;
-            string Name;
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
 
         static List<Proc> ProcessList = new List<Proc>();
@@ -68,6 +69,10 @@ namespace TaskManagerServerSide
             switch (mode)
             {
                 case "Connect":
+                    {
+
+                    }
+                    break;
                 case "Refresh":
                     break;
                 case "Run":
@@ -98,7 +103,11 @@ namespace TaskManagerServerSide
             {
                 try
                 {
-                    ProcessList.Add(item.ProcessName);
+                    var proc = new Proc();
+                    proc.Id = item.Id;
+                    proc.Name = item.ProcessName;
+
+                    ProcessList.Add(proc);
                 }
                 catch (Exception)
                 { }

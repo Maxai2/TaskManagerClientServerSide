@@ -24,7 +24,7 @@
 			<Button Grid.Column="1" Margin="5 0 0 0" Content="Disconnect" Visibility="{Binding DisconButVis}" Command="{Binding DisconnectCom}"/>
 		</Grid>
 
-		<ListBox Grid.Row="1" Margin="0 5" ItemsSource="{Binding ProcessList}" SelectedIndex="{Binding ProcIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ListIsEnable}">
+		<ListBox Grid.Row="1" Margin="0 5" ItemsSource="{Binding ProcessList}" SelectedItem="{Binding ProcIndex, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" IsEnabled="{Binding ListIsEnable}">
 
 			<ListBox.ContextMenu>
 				<ContextMenu DataContext="{Binding Path=PlacementTarget, RelativeSource={RelativeSource Self}}">
@@ -32,6 +32,12 @@
 					<MenuItem Header="Kill" Command="{Binding Path=DataContext.KillCom}"/>
 				</ContextMenu>
 			</ListBox.ContextMenu>
+
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<TextBlock Text="{Binding Name}"/>
+				</DataTemplate>
+			</ListBox.ItemTemplate>
 			
 			<!--<ListBox.ItemContainerStyle>
 				<Style TargetType="ListBoxItem">

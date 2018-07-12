@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -6,6 +7,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Runtime.CompilerServices;
+using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Threading.Tasks;
@@ -18,7 +20,14 @@ namespace TaskManagerClientSide
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public ObservableCollection<string> ProcessList { get; set; }
+        [Serializable]
+        public struct Proc : ISerializable
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
+        }
+
+        public ObservableCollection<Proc> ProcessList { get; set; }
 
         Socket socket;
         EndPoint ep;
@@ -37,8 +46,8 @@ namespace TaskManagerClientSide
             set { runTask = value; OnChanged(); }
         }
 
-        private int procIndex;
-        public int ProcIndex
+        private Proc procIndex;
+        public Proc ProcIndex
         {
             get { return procIndex; }
             set { procIndex = value; OnChanged(); }
@@ -81,7 +90,7 @@ namespace TaskManagerClientSide
 
             DataContext = this;
 
-            ProcessList = new ObservableCollection<string>();
+            ProcessList = new ObservableCollection<Proc>();
         }
 
         //----------------------------------------------------------------------
@@ -240,7 +249,7 @@ namespace TaskManagerClientSide
                     data = Encoding.Default.GetBytes("Connect:");
                     break;
                 case "Kill":
-                    data = Encoding.Default.GetBytes($"Kill:{ProcIndex}");
+                    data = Encoding.Default.GetBytes($"Kill:{ProcIndex.Id}");
                     break;
                 case "Run":
                     data = Encoding.Default.GetBytes($"Run:{RunTask}");
@@ -264,13 +273,17 @@ namespace TaskManagerClientSide
                 mStream.Write(answer, 0, length);
                 mStream.Position = 0;
 
-                var tempCol = binFormatter.Deserialize(mStream) as List<string>;
+                var tempCol = binFormatter.Deserialize(mStream) as List<Proc>;
 
                 ProcessList.Clear();
 
                 foreach (var item in tempCol)
                 {
-                    ProcessList.Add(item);
+                    var proc = new Proc();
+                    proc.Id = item.Id;
+                    proc.Name = item.Name;
+
+                    ProcessList.Add(proc);
                 }
             }
         }
