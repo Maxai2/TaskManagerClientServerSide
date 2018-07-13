@@ -21,7 +21,7 @@ namespace TaskManagerClientSide
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
         [Serializable]
-        public struct Proc : ISerializable
+        public struct Proc
         {
             public int Id { get; set; }
             public string Name { get; set; }
