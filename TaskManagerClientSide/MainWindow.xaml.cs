@@ -54,7 +54,7 @@ namespace TaskManagerClientSide
             set { conButVis = value; OnChanged(); }
         }
 
-        private Visibility disconButVis = Visibility.Collapsed;
+        private Visibility disconButVis = Visibility.Collapsed; 
         public Visibility DisconButVis
         {
             get { return disconButVis; }
