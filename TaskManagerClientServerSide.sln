@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagerClientSide", "Ta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskManagerServerSide", "TaskManagerServerSide\TaskManagerServerSide.csproj", "{890256C9-785C-4A24-9CCD-5DF600BB91B3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ProcessorItemDLL", "ProcessorItemDLL\ProcessorItemDLL.csproj", "{D43EF372-264B-46E6-8D80-8A707760A67C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +23,10 @@ Global
 		{890256C9-785C-4A24-9CCD-5DF600BB91B3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{890256C9-785C-4A24-9CCD-5DF600BB91B3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{890256C9-785C-4A24-9CCD-5DF600BB91B3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D43EF372-264B-46E6-8D80-8A707760A67C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D43EF372-264B-46E6-8D80-8A707760A67C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D43EF372-264B-46E6-8D80-8A707760A67C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D43EF372-264B-46E6-8D80-8A707760A67C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -7,19 +7,13 @@ using System.Net;
 using System.Net.Sockets;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using ProcessorItemDLL;
 
 namespace TaskManagerServerSide
 {
     class Program
     {
-        [Serializable]
-        struct Proc
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
-        static List<Proc> ProcessList = new List<Proc>();
+        static List<ProcessorItemDLL.ProcItem> ProcessList = new List<ProcessorItemDLL.ProcItem>();
         static Socket socket;
         //--------------------------------------------------------------------
 
@@ -103,7 +97,7 @@ namespace TaskManagerServerSide
             {
                 try
                 {
-                    var proc = new Proc();
+                    var proc = new ProcessorItemDLL.ProcItem();
                     proc.Id = item.Id;
                     proc.Name = item.ProcessName;
 

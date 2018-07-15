@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using ProcessorItemDLL;
 
 //----------------------------------------------------------------------
 
@@ -20,14 +21,7 @@ namespace TaskManagerClientSide
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        [Serializable]
-        public struct Proc : ISerializable
-        {
-            public int Id { get; set; }
-            public string Name { get; set; }
-        }
-
-        public ObservableCollection<Proc> ProcessList { get; set; }
+        public ObservableCollection<ProcessorItemDLL.ProcItem> ProcessList { get; set; }
 
         Socket socket;
         EndPoint ep;
@@ -46,8 +40,8 @@ namespace TaskManagerClientSide
             set { runTask = value; OnChanged(); }
         }
 
-        private Proc procIndex;
-        public Proc ProcIndex
+        private ProcessorItemDLL.ProcItem procIndex;
+        public ProcessorItemDLL.ProcItem ProcIndex
         {
             get { return procIndex; }
             set { procIndex = value; OnChanged(); }
@@ -90,7 +84,7 @@ namespace TaskManagerClientSide
 
             DataContext = this;
 
-            ProcessList = new ObservableCollection<Proc>();
+            ProcessList = new ObservableCollection<ProcessorItemDLL.ProcItem>();
         }
 
         //----------------------------------------------------------------------
@@ -273,13 +267,13 @@ namespace TaskManagerClientSide
                 mStream.Write(answer, 0, length);
                 mStream.Position = 0;
 
-                var tempCol = binFormatter.Deserialize(mStream) as List<Proc>;
+                var tempCol = binFormatter.Deserialize(mStream) as List<ProcessorItemDLL.ProcItem>;
 
                 ProcessList.Clear();
 
                 foreach (var item in tempCol)
                 {
-                    var proc = new Proc();
+                    var proc = new ProcessorItemDLL.ProcItem();
                     proc.Id = item.Id;
                     proc.Name = item.Name;
 
