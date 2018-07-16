@@ -10,6 +10,7 @@ using System.Runtime.CompilerServices;
 using System.Runtime.Serialization;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
@@ -75,7 +76,6 @@ namespace TaskManagerClientSide
             set { runIsEnable = value; OnChanged(); }
         }
 
-
         //----------------------------------------------------------------------
 
         public MainWindow()
@@ -101,7 +101,6 @@ namespace TaskManagerClientSide
                         {
                             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
                             ep = new IPEndPoint(IPAddress.Parse(ConDisConIp), 7534);
-
                             socket.Connect(ep);
 
                             RefreshProcListByCom("Connect");
@@ -115,13 +114,9 @@ namespace TaskManagerClientSide
                         (param) =>
                         {
                             if (ConDisConIp != "")
-                            {
                                 return true;
-                            }
                             else
-                            {
                                 return false;
-                            }
                         });
                 }
 
@@ -141,7 +136,8 @@ namespace TaskManagerClientSide
                     disconnectCom = new RelayCommand(
                         (param) =>
                         {
-                            socket.Disconnect(false);
+                            socket.Shutdown(SocketShutdown.Both);
+                            socket.Close();
 
                             ConButVis = Visibility.Visible;
                             DisconButVis = Visibility.Collapsed;
@@ -155,7 +151,6 @@ namespace TaskManagerClientSide
             }
         }
 
-
         //----------------------------------------------------------------------
 
         private ICommand killCom;
@@ -166,10 +161,7 @@ namespace TaskManagerClientSide
                 if (killCom is null)
                 {
                     killCom = new RelayCommand(
-                        (param) =>
-                        {
-                            RefreshProcListByCom("Kill");
-                        });
+                        (param) => RefreshProcListByCom("Kill"));
                 }
 
                 return killCom;
@@ -186,10 +178,7 @@ namespace TaskManagerClientSide
                 if (refreshCom is null)
                 {
                     refreshCom = new RelayCommand(
-                        (param) =>
-                        {
-                            RefreshProcListByCom("Refresh");
-                        });
+                        (param) => RefreshProcListByCom("Refresh"));
                 }
 
                 return refreshCom;
@@ -208,19 +197,15 @@ namespace TaskManagerClientSide
                         (param) =>
                         {
                             RefreshProcListByCom("Run");
-
+                            RefreshProcListByCom("Refresh");
                             RunTask = "";
                         },
                         (param) =>
                         {
                             if (RunTask != "")
-                            {
                                 return true;
-                            }
                             else
-                            {
                                 return false;
-                            }
                         });
                 }
 
@@ -236,9 +221,6 @@ namespace TaskManagerClientSide
 
             switch (com)
             {
-                case "Disconnect":
-                    data = Encoding.Default.GetBytes("Disconnect:");
-                    break;
                 case "Connect":
                     data = Encoding.Default.GetBytes("Connect:");
                     break;
@@ -249,7 +231,7 @@ namespace TaskManagerClientSide
                     data = Encoding.Default.GetBytes($"Run:{RunTask}");
                     break;
                 case "Refresh":
-                    data = Encoding.Default.GetBytes($"Refresh:");
+                    data = Encoding.Default.GetBytes("Refresh:");
                     break;
             }
 

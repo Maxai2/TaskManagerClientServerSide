@@ -13,7 +13,6 @@ namespace TaskManagerServerSide
 {
     class Program
     {
-
         static List<ProcItem> ProcessList = new List<ProcItem>();
         static Socket socket;
         static EndPoint ep;
@@ -23,40 +22,36 @@ namespace TaskManagerServerSide
         static void Main(string[] args)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
-            //var ep = new IPEndPoint(IPAddress.Parse("172.16.1.60"), 7534);
             ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7534);
             socket.Bind(ep);
             socket.Listen(10);
 
-            ConnectClient();
-        }
-
-        //--------------------------------------------------------------------
-
-        static void ConnectClient()
-        {
             var bytes = new byte[8192];
-
-            var client = socket.Accept();
 
             while (true)
             {
-                var length = client.Receive(bytes);
+                var client = socket.Accept();
 
-                var msg = Encoding.Default.GetString(bytes, 0, length);
-
-                //Console.WriteLine(msg);
-
-                if (msg != "")
+                while (true)
                 {
-                    ParseMsg(msg);
+                    var length = client.Receive(bytes);
 
-                    var sendBytes = fillProcList();
+                    var msg = Encoding.Default.GetString(bytes, 0, length);
 
-                    //socket.Connect(ep);
-                    client.Send(sendBytes);
+                    if (msg != "")
+                    {
+                        ParseMsg(msg);
 
-                    msg = string.Empty;
+                        if (msg != "Run")
+                        {
+                            var sendBytes = fillProcList();
+                            client.Send(sendBytes);
+                        }
+
+                        msg = string.Empty;
+                    }
+                    else
+                        break;
                 }
             }
         }
@@ -71,27 +66,14 @@ namespace TaskManagerServerSide
 
             switch (mode)
             {
-                case "Connect":
-                    {
-                        //ConnectClient();
-                    }
-                    break;
                 case "Refresh":
                     break;
                 case "Run":
-                    {
-                        Process.Start(variable);
-                    }
+                    Process.Start(variable);
                     break;
                 case "Kill":
-                    {
-                        var proc = Process.GetProcessById(Convert.ToInt32(variable));
-
-                        proc.Kill();
-                    }
-                    break;
-                case "Disconnect":
-                    socket.Close();
+                    var proc = Process.GetProcessById(Convert.ToInt32(variable));
+                    proc.Kill();
                     break;
             }
         }
@@ -100,30 +82,24 @@ namespace TaskManagerServerSide
 
         static byte[] fillProcList()
         {
-            bool refr = false;
-
-            REFRESH:
-
             ProcessList.Clear();
+
 
             foreach (var item in Process.GetProcesses().OrderBy(f => f.ProcessName))
             {
                 try
                 {
-                    var proc = new ProcItem();
-                    proc.Id = item.Id;
-                    proc.Name = item.ProcessName;
+                    var proc = new ProcItem
+                    {
+                        Id = item.Id,
+                        Name = item.ProcessName
+                    };
 
                     ProcessList.Add(proc);
                 }
                 catch (Exception)
                 { }
             }
-
-            if (refr)
-                goto REFRESH;
-            else
-                refr = !refr;
 
             var binFormatter = new BinaryFormatter();
             var mStream = new MemoryStream();

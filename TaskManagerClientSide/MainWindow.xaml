@@ -4,7 +4,8 @@
 								xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
 								xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
 								xmlns:local="clr-namespace:TaskManagerClientSide"
-								mc:Ignorable="d" Title="MainWindow" Height="450" Width="600" WindowStartupLocation="CenterScreen">
+								mc:Ignorable="d" Title="MainWindow" Height="450" Width="600" FocusManager.FocusedElement="{Binding ElementName=tbIp}" WindowStartupLocation="CenterScreen">
+	
 	<Grid Margin="10 2">
 		<Grid.RowDefinitions>
 			<RowDefinition Height="Auto"/>
@@ -18,7 +19,7 @@
 				<ColumnDefinition/>
 			</Grid.ColumnDefinitions>
 
-			<TextBox Grid.Column="0" Text="{Binding ConDisConIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+			<TextBox Name="tbIp" Grid.Column="0" Text="{Binding ConDisConIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
 				<TextBox.InputBindings>
 					<KeyBinding Key="Enter" Command="{Binding ConnectCom}"/>
 				</TextBox.InputBindings>
