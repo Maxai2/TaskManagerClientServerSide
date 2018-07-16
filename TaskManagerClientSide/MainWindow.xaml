@@ -18,7 +18,11 @@
 				<ColumnDefinition/>
 			</Grid.ColumnDefinitions>
 
-			<TextBox Grid.Column="0" Text="{Binding ConDisConIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+			<TextBox Grid.Column="0" Text="{Binding ConDisConIp, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+				<TextBox.InputBindings>
+					<KeyBinding Key="Enter" Command="{Binding ConnectCom}"/>
+				</TextBox.InputBindings>
+			</TextBox>
 
 			<Button Grid.Column="1" Margin="5 0 0 0" Content="Connect" Command="{Binding ConnectCom}" Visibility="{Binding ConButVis}"/>
 			<Button Grid.Column="1" Margin="5 0 0 0" Content="Disconnect" Visibility="{Binding DisconButVis}" Command="{Binding DisconnectCom}"/>
@@ -38,7 +42,7 @@
 					<TextBlock Text="{Binding Name}"/>
 				</DataTemplate>
 			</ListBox.ItemTemplate>
-			
+
 			<!--<ListBox.ItemContainerStyle>
 				<Style TargetType="ListBoxItem">
 					<Setter Property="ContextMenu">
@@ -51,7 +55,7 @@
 					</Setter>
 				</Style>
 			</ListBox.ItemContainerStyle>-->
-			
+
 		</ListBox>
 
 		<Grid Grid.Row="2" IsEnabled="{Binding RunIsEnable}">
@@ -60,7 +64,11 @@
 				<ColumnDefinition/>
 			</Grid.ColumnDefinitions>
 
-			<TextBox Grid.Column="0" Text="{Binding RunTask, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+			<TextBox Grid.Column="0" Text="{Binding RunTask, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+				<TextBox.InputBindings>
+					<KeyBinding Key="Enter" Command="{Binding RunCom}"/>
+				</TextBox.InputBindings>
+			</TextBox>
 
 			<Button Grid.Column="1" Margin="5 0 0 0" Content="Run" Command="{Binding RunCom}"/>
 		</Grid>

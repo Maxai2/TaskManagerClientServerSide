@@ -13,19 +13,28 @@ namespace TaskManagerServerSide
 {
     class Program
     {
-        static List<ProcessorItemDLL.ProcItem> ProcessList = new List<ProcessorItemDLL.ProcItem>();
+
+        static List<ProcItem> ProcessList = new List<ProcItem>();
         static Socket socket;
+        static EndPoint ep;
+
         //--------------------------------------------------------------------
 
         static void Main(string[] args)
         {
             socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
             //var ep = new IPEndPoint(IPAddress.Parse("172.16.1.60"), 7534);
-            var ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7534);
-
+            ep = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 7534);
             socket.Bind(ep);
             socket.Listen(10);
 
+            ConnectClient();
+        }
+
+        //--------------------------------------------------------------------
+
+        static void ConnectClient()
+        {
             var bytes = new byte[8192];
 
             var client = socket.Accept();
@@ -64,7 +73,7 @@ namespace TaskManagerServerSide
             {
                 case "Connect":
                     {
-
+                        //ConnectClient();
                     }
                     break;
                 case "Refresh":
@@ -91,13 +100,17 @@ namespace TaskManagerServerSide
 
         static byte[] fillProcList()
         {
+            bool refr = false;
+
+            REFRESH:
+
             ProcessList.Clear();
 
             foreach (var item in Process.GetProcesses().OrderBy(f => f.ProcessName))
             {
                 try
                 {
-                    var proc = new ProcessorItemDLL.ProcItem();
+                    var proc = new ProcItem();
                     proc.Id = item.Id;
                     proc.Name = item.ProcessName;
 
@@ -106,6 +119,11 @@ namespace TaskManagerServerSide
                 catch (Exception)
                 { }
             }
+
+            if (refr)
+                goto REFRESH;
+            else
+                refr = !refr;
 
             var binFormatter = new BinaryFormatter();
             var mStream = new MemoryStream();

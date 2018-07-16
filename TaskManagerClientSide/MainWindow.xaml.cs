@@ -21,7 +21,7 @@ namespace TaskManagerClientSide
 {
     public partial class MainWindow : Window, INotifyPropertyChanged
     {
-        public ObservableCollection<ProcessorItemDLL.ProcItem> ProcessList { get; set; }
+        public ObservableCollection<ProcItem> ProcessList { get; set; }
 
         Socket socket;
         EndPoint ep;
@@ -40,8 +40,8 @@ namespace TaskManagerClientSide
             set { runTask = value; OnChanged(); }
         }
 
-        private ProcessorItemDLL.ProcItem procIndex;
-        public ProcessorItemDLL.ProcItem ProcIndex
+        private ProcItem procIndex;
+        public ProcItem ProcIndex
         {
             get { return procIndex; }
             set { procIndex = value; OnChanged(); }
@@ -84,7 +84,7 @@ namespace TaskManagerClientSide
 
             DataContext = this;
 
-            ProcessList = new ObservableCollection<ProcessorItemDLL.ProcItem>();
+            ProcessList = new ObservableCollection<ProcItem>();
         }
 
         //----------------------------------------------------------------------
@@ -141,7 +141,7 @@ namespace TaskManagerClientSide
                     disconnectCom = new RelayCommand(
                         (param) =>
                         {
-                            RefreshProcListByCom("Disconnect");
+                            socket.Disconnect(false);
 
                             ConButVis = Visibility.Visible;
                             DisconButVis = Visibility.Collapsed;
@@ -267,13 +267,13 @@ namespace TaskManagerClientSide
                 mStream.Write(answer, 0, length);
                 mStream.Position = 0;
 
-                var tempCol = binFormatter.Deserialize(mStream) as List<ProcessorItemDLL.ProcItem>;
+                var tempCol = binFormatter.Deserialize(mStream) as List<ProcItem>;
 
                 ProcessList.Clear();
 
                 foreach (var item in tempCol)
                 {
-                    var proc = new ProcessorItemDLL.ProcItem();
+                    var proc = new ProcItem();
                     proc.Id = item.Id;
                     proc.Name = item.Name;
 
