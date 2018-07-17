@@ -55,7 +55,7 @@ namespace TaskManagerClientSide
             set { conButVis = value; OnChanged(); }
         }
 
-        private Visibility disconButVis = Visibility.Collapsed; 
+        private Visibility disconButVis = Visibility.Collapsed;
         public Visibility DisconButVis
         {
             get { return disconButVis; }
@@ -197,6 +197,7 @@ namespace TaskManagerClientSide
                         (param) =>
                         {
                             RefreshProcListByCom("Run");
+                            Thread.Sleep(500);
                             RefreshProcListByCom("Refresh");
                             RunTask = "";
                         },
@@ -251,16 +252,19 @@ namespace TaskManagerClientSide
 
                 var tempCol = binFormatter.Deserialize(mStream) as List<ProcItem>;
 
-                ProcessList.Clear();
-
-                foreach (var item in tempCol)
+                Dispatcher.Invoke(() =>
                 {
-                    var proc = new ProcItem();
-                    proc.Id = item.Id;
-                    proc.Name = item.Name;
+                    ProcessList.Clear();
 
-                    ProcessList.Add(proc);
-                }
+                    foreach (var item in tempCol)
+                    {
+                        var proc = new ProcItem();
+                        proc.Id = item.Id;
+                        proc.Name = item.Name;
+
+                        ProcessList.Add(proc);
+                    }
+                });
             }
         }
 

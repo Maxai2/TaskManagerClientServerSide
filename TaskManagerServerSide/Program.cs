@@ -84,7 +84,6 @@ namespace TaskManagerServerSide
         {
             ProcessList.Clear();
 
-
             foreach (var item in Process.GetProcesses().OrderBy(f => f.ProcessName))
             {
                 try
